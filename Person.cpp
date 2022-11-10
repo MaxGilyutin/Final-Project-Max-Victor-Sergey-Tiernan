@@ -18,28 +18,39 @@
 using namespace std;
 
 Person::Person(string inputString) : Person() {
-   
+    string str = inputString;
+    stringstream ss(str);
+    
+    char x;
+
+    ss >> turn;
+    ss >> x;
+    ss >> currentFloor;
+    ss >> x;
+    ss >> targetFloor;
+    ss >> x;
+    ss >> angerLevel;
+    
 }
 
 bool Person::tick(int currentTime) {
 
-    for (angerLevel = TICKS_PER_ANGER_INCREASE;
-         angerLevel < MAX_ANGER; angerLevel++){
-        if (angerLevel == MAX_ANGER){
+    if (currentTime % TICKS_PER_ANGER_INCREASE >= 0){
+        angerLevel += 1;
+        if (angerLevel >= MAX_ANGER){
             return true;
-            }
-        
-        else if (angerLevel < MAX_ANGER){
+        }
+        else{
             return false;
         }
-        
     }
-    return false;
+    else{
+        return false;
+    }
 }
-
 void Person::print(ostream &outs) {    
     
-    cout << "f" << currentFloor << "t" << targetFloor << "a" << angerLevel;
+    outs << "f" << currentFloor << "t" << targetFloor << "a" << angerLevel << endl;
     
 }
 
