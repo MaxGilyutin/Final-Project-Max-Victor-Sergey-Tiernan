@@ -15,7 +15,9 @@
 using namespace std;
 
 void Building::spawnPerson(Person newPerson){
-    //TODO: Implement spawnPerson
+    int request = newPerson.getTargetFloor() - newPerson.getCurrentFloor();
+    floors[newPerson.getCurrentFloor()].addPerson(newPerson, request);
+    
 }
 
 void Building::update(Move move){
@@ -24,7 +26,7 @@ void Building::update(Move move){
 
 int Building::tick(Move move){
     //TODO: Implement tick
-
+    
     //returning 0 to prevent compilation error
     return 0;
 }
