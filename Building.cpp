@@ -21,6 +21,14 @@ void Building::spawnPerson(Person newPerson){
 }
 
 void Building::update(Move move){
+    if (move.isValidMove(elevators)) {
+        if (!move.isPassMove()) {
+            getElevatorById(move.getElevatorId()).serviceRequest(move.getTargetFloor());
+            if (move.isPickupMove()) {
+               // move.copyListOfPeopleToPickup(int newList);
+            }
+        }
+    }
     //TODO: Implement update
 }
 
