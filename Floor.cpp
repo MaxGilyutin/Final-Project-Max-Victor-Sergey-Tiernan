@@ -4,7 +4,7 @@
  * Floor.cpp
  * Project UID 28eb18c2c1ce490aada441e65559efdd
  *
- * <#Names#>
+ * Max Victor Sergey Tiernan
  * <#Uniqnames#>
  *
  * Final Project - Elevators
@@ -16,11 +16,22 @@
 using namespace std;
 
 int Floor::tick(int currentTime) {
-    //TODO: Implement tick
+    
+    
+    Person p;
+    p.tick(currentTime);
+    
+    for (int i = 0; i <= MAX_PEOPLE_PER_FLOOR; i++){
+        if (p.tick(currentTime) == true){
+            i += 1;
+            return i;
+        }
 
+    }
     //returning 0 to prevent compilation error
     return 0;
 }
+
 
 void Floor::addPerson(Person newPerson, int request) {
     //TODO: Implement addPerson
