@@ -24,7 +24,6 @@ Move::Move(string commandString) : Move() {
     stringstream ss(str);
 
     char x;
-    char y;
     isPass = false;
     isPickup = false;
     isSave = false;
@@ -37,11 +36,11 @@ Move::Move(string commandString) : Move() {
         isPass == true;
     }
     
-    else if (x == 'Q')
+    else if (x == 'Q' || x == 'q')
     {
         isQuit = true;
     }
-    else if(x == 'S')
+    else if(x == 'S' || x == 's')
     {
         isSave = true;
     }
@@ -96,6 +95,22 @@ bool Move::isValidMove(Elevator elevators[NUM_ELEVATORS]) const {
 
 void Move::setPeopleToPickup(const string& pickupList, const int currentFloor, const Floor& pickupFloor) {
     //TODO: Implement setPeopleToPickup
+    numPeopleToPickup = 0;
+    totalSatisfaction = 0;
+    targetFloor = 0;
+
+    for (int i = 0; i < pickupList.length(); i++)
+    {
+        int x = (int)(pickupList[i]);
+        peopleToPickup[i] = x;
+        numPeopleToPickup++;
+        totalSatisfaction += (MAX_ANGER - pickupFloor.getPersonByIndex(x).getAngerLevel());
+
+        if (abs(currentFloor - pickupFloor.getPersonByIndex(x).getTargetFloor()) >= targetFloor)
+        {
+            targetFloor = i;
+        }
+    }
 }
 
 //////////////////////////////////////////////////////
