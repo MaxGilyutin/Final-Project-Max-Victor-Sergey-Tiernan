@@ -17,19 +17,21 @@ using namespace std;
 
 int Floor::tick(int currentTime) {
     
-    
-    Person p;
-    p.tick(currentTime);
+    int numExploded = 0;
+    string str = "";
     
     for (int i = 0; i <= MAX_PEOPLE_PER_FLOOR; i++){
-        if (p.tick(currentTime) == true){
-            i += 1;
-            return i;
-        }
+        if (people[i].tick(currentTime)){
+            numExploded += 1;
+            str += (char) i;
 
+        }
+        
+        int a[numExploded];
+
+        removePeople(a, numExploded);
     }
-    //returning 0 to prevent compilation error
-    return 0;
+    return numExploded;
 }
 
 
@@ -51,37 +53,47 @@ void Floor::addPerson(Person newPerson, int request) {
 }
 
 void Floor::removePeople(int indicesToRemove[MAX_PEOPLE_PER_FLOOR], int numPeopleToRemove) {
-	//TODO: Implement removePeople
-	Person array[MAX_PEOPLE_PER_FLOOR];
-	int skips = 0;
-		
-		for (int i = 0; i < numPeople; i++)
-		{
-			for (int z = 0; z < numPeopleToRemove; z++)
-			{
-				if (i != indicesToRemove[z])
-				{
-					array[i - skips] = people[i];
-				}
-				else
-				{
-					skips++;
-				}
-			}
-				
-		}
-		numPeople -= numPeopleToRemove;
-		
-		for (int i = 0; i < MAX_PEOPLE_PER_FLOOR; i++)
-		{
-			people[i] = array[i];
-		}
-	
+
+    Person array[MAX_PEOPLE_PER_FLOOR];
+    int skips = 0;
+        
+        for (int i = 0; i < numPeople; i++)
+        {
+            for (int z = 0; z < numPeopleToRemove; z++)
+            {
+                if (i != indicesToRemove[z])
+                {
+                    array[i - skips] = people[i];
+                }
+                else
+                {
+                    skips++;
+                }
+            }
+                
+        }
+        numPeople -= numPeopleToRemove;
+        
+        for (int i = 0; i < MAX_PEOPLE_PER_FLOOR; i++)
+        {
+            people[i] = array[i];
+        }
+    
 }
 
+
+
+
 void Floor::resetRequests() {
-    //TODO: Implement resetRequests
+
 }
+
+
+
+
+
+
+
 
 //////////////////////////////////////////////////////
 ////// DO NOT MODIFY ANY CODE BENEATH THIS LINE //////
