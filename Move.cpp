@@ -30,9 +30,9 @@ Move::Move(string commandString) : Move() {
     isQuit = false;
 
     ss >> x;
-    if (ss.fail())
+    if (commandString.size() == 0)
     {
-        ss.clear();
+        
         isPass == true;
     }
     
@@ -97,20 +97,32 @@ void Move::setPeopleToPickup(const string& pickupList, const int currentFloor, c
     //TODO: Implement setPeopleToPickup
     numPeopleToPickup = 0;
     totalSatisfaction = 0;
-    targetFloor = 0;
+    
+   
 
     for (int i = 0; i < pickupList.length(); i++)
     {
-        int x = (int)(pickupList[i]);
+        int x = (int)(pickupList.at(i));
         peopleToPickup[i] = x;
         numPeopleToPickup++;
-        totalSatisfaction += (MAX_ANGER - pickupFloor.getPersonByIndex(x).getAngerLevel());
+        totalSatisfaction += (MAX_ANGER - pickupFloor.getPersonByIndex(peopleToPickup[i]).getAngerLevel());
 
-        if (abs(currentFloor - pickupFloor.getPersonByIndex(x).getTargetFloor()) >= targetFloor)
+        
+    }
+
+    targetFloor = pickupFloor.getPersonByIndex(peopleToPickup[0]).getTargetFloor();
+    int floorDiff = abs(currentFloor - targetFloor);
+
+    for (int i = 1; i < pickupList.length(); i++)
+    {
+        if (abs(currentFloor - pickupFloor.getPersonByIndex(peopleToPickup[i]).getTargetFloor()) > floorDiff)
         {
-            targetFloor = i;
+            targetFloor = pickupFloor.getPersonByIndex(peopleToPickup[i]).getTargetFloor();
+            floorDiff = abs(currentFloor - targetFloor);
+
         }
     }
+
 }
 
 //////////////////////////////////////////////////////
