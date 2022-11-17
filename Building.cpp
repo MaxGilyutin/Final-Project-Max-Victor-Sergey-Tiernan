@@ -26,6 +26,7 @@ void Building::update(Move move){
             getElevatorById(move.getElevatorId()).serviceRequest(move.getTargetFloor());
             if (move.isPickupMove()) {
                // move.copyListOfPeopleToPickup(int newList);
+               // getFloorByFloorNum(floors).removePeople(<#int *indicesToRemove#>, <#const int numPeopleToRemove#>);
             }
         }
     }
@@ -33,10 +34,18 @@ void Building::update(Move move){
 }
 
 int Building::tick(Move move){
-    //TODO: Implement tick
-    
-    //returning 0 to prevent compilation error
-    return 0;
+    time++;
+    int countExplodedPeople = 0;
+    for(int i = 0; i < NUM_ELEVATORS; i++) {
+        elevators[i].tick(time);
+    }
+    for(int j = 0; j < NUM_FLOORS; j++) {
+        floors[j].tick(time);
+        if (floors[j].tick(time) != 0) {
+            countExplodedPeople++;
+        }
+    }
+    return countExplodedPeople;
 }
 
 //////////////////////////////////////////////////////
