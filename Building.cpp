@@ -22,29 +22,28 @@ void Building::spawnPerson(Person newPerson){
 
 void Building::update(Move move){
     int copy[MAX_PEOPLE_PER_FLOOR];
-    if (move.isValidMove(elevators)) {
-        if (!move.isPassMove()) {
-            getElevatorById(move.getElevatorId()).serviceRequest(move.getTargetFloor());
-            if (move.isPickupMove()) {
-                move.copyListOfPeopleToPickup(copy);
-                floors[elevators[move.getElevatorId()].getCurrentFloor()].removePeople(copy, move.getNumPeopleToPickup());
-            }
-        }
+    if (move.isPassMove()) {
+        return;
     }
-    //TODO: Implement update
+    else if (move.isPickupMove()) {
+        elevators[(move.getElevatorId())].serviceRequest(move.getTargetFloor());
+        move.copyListOfPeopleToPickup(copy);
+        floors[elevators[move.getElevatorId()].getCurrentFloor()].removePeople(copy, move.getNumPeopleToPickup());
+    }
+    else {
+        floors[elevators[move.getElevatorId()].getCurrentFloor()].removePeople(copy, move.getNumPeopleToPickup());
+    }
 }
 
 int Building::tick(Move move){
     time++;
+    update(move);
     int countExplodedPeople = 0;
     for(int i = 0; i < NUM_ELEVATORS; i++) {
         elevators[i].tick(time);
     }
     for(int j = 0; j < NUM_FLOORS; j++) {
-        floors[j].tick(time);
-        if (floors[j].tick(time) != 0) {
-            countExplodedPeople++;
-        }
+        countExplodedPeople += floors[j].tick(time);
     }
     return countExplodedPeople;
 }
