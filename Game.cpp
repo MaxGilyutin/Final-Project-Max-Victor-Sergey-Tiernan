@@ -50,6 +50,57 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
 // Stub for isValidPickupList for Core
 // You *must* revise this function according to the RME and spec
 bool Game::isValidPickupList(const string& pickupList, const int pickupFloorNum) const {
+    
+    //  Makes sure the list doesn't exceed elevator capacity
+    if(pickupList.size() > ELEVATOR_CAPACITY){
+        return false;
+    }
+    // Makes sure no repeats are present
+    for(int i = 0; i < pickupList.size()-1; i ++){
+        for(int j = i+1; j < pickupList.size(); j++){
+            if(pickupList.at(i) == pickupList.at(j)){
+                return false;
+            }
+        }
+    }
+    // Runs through string, makes sure all are positive
+    for(int i = 0; i < pickupList.size(); i++){
+        if(pickupList.at(i) < 0){
+            return false;
+        }
+    }
+    
+    //Makes sure all the pickups are heading in the same direction above pickupFloorNum
+    if(pickupList.at(0) > pickupFloorNum){
+        for(int i = 1; i < pickupList.size(); i++){
+            if(pickupList.at(i) < pickupFloorNum){
+                return false;
+            }
+        }
+    }
+    
+    // Same as above, just for pickups that are below pickupFloorNum
+    if(pickupList.at(0) < pickupFloorNum){
+        for(int i = 1; i < pickupList.size(); i++){
+            if(pickupList.at(i) < pickupFloorNum){
+                return false;
+            }
+        }
+    }
+    
+    //The maximum value pointed to by an index of pickupList must be strictly less than the number of people on the floor pointed to by pickupFloorNum
+    int max = 0;
+    for(int i = 0; i < pickupList.size(); i++){
+        if(pickupList.at(i) > max){
+            max = pickupList.at(i);
+        }
+    }
+    // returns false if an index of pickupList exceeds the number
+    // of people on that floor
+    if(max > building.getFloorByFloorNum(pickupFloorNum).getNumPeople()){
+        return false;
+    }
+    
     return true;
 }
 
