@@ -21,17 +21,17 @@ void Building::spawnPerson(Person newPerson){
 }
 
 void Building::update(Move move){
-    int copy[MAX_PEOPLE_PER_FLOOR];
+    int copyPeople[MAX_PEOPLE_PER_FLOOR];
     if (move.isPassMove()) {
         return;
     }
     else if (move.isPickupMove()) {
         elevators[(move.getElevatorId())].serviceRequest(move.getTargetFloor());
-        move.copyListOfPeopleToPickup(copy);
-        floors[elevators[move.getElevatorId()].getCurrentFloor()].removePeople(copy, move.getNumPeopleToPickup());
+        move.copyListOfPeopleToPickup(copyPeople);
+        floors[elevators[move.getElevatorId()].getCurrentFloor()].removePeople(copyPeople, move.getNumPeopleToPickup());
     }
     else {
-        floors[elevators[move.getElevatorId()].getCurrentFloor()].removePeople(copy, move.getNumPeopleToPickup());
+        elevators[move.getElevatorId()].serviceRequest(move.getTargetFloor());
     }
 }
 
