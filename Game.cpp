@@ -23,66 +23,113 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
     std::mt19937 gen(1);
     std::uniform_int_distribution<> floorDist(0, 9);
     std::uniform_int_distribution<> angerDist(0, 3);
-
+    
+    //load and prepare all the data for the game loop
     isAIMode = isAIModeIn;
     printGameStartPrompt();
     initGame(gameFile);
-
+    
+    string line;
+    int currentTick = 0;
+    // game loop
+    Person p;
+    
+    if(getline(gameFile,line))
+    {
+        p = Person(line);
+    }
     while (true) {
+        // read all events for current tick from game.in and spawn new persons if any
+        while(currentTick == p.getTurn()){
+            building.spawnPerson(p);
+            if(getline(gameFile,line)) {
+                p = Person(line);
+            }
+            else{
+                break;
+            }
+        }
+
+        
+        
+        // print the building
+        
+        // check if game ended
+        
+        // take player's/AI's move
+        
+        // update game according to the move
+        
+        /*
         int src = floorDist(gen);
         int dst = floorDist(gen);
         if (src != dst) {
             std::stringstream ss;
-            ss << "0f" << src << "t" << dst << "a" << angerDist(gen);
-            Person p(ss.str());
-            building.spawnPerson(p);
+            ss << currentTick << "f" << src << "t" << dst << "a" << angerDist(gen);
+            p = Person(ss.str());
         }
-
+        */
+        
         building.prettyPrintBuilding(cout);
         satisfactionIndex.printSatisfaction(cout, false);
+        //ends the game if gameend conditions are met
         checkForGameEnd();
-
+        
         Move nextMove = getMove();
         update(nextMove);
+        
+        currentTick++;
     }
 }
-
 // Stub for isValidPickupList for Core
 // You *must* revise this function according to the RME and spec
 bool Game::isValidPickupList(const string& pickupList, const int pickupFloorNum) const {
     
+    //TO DO:
+    //Figure out how to convert pickupList
     //  Makes sure the list doesn't exceed elevator capacity
-    if(pickupList.size() > ELEVATOR_CAPACITY){
+    if(pickupList.length() > ELEVATOR_CAPACITY){
         return false;
     }
     // Makes sure no repeats are present
-    for(int i = 0; i < pickupList.size()-1; i ++){
-        for(int j = i+1; j < pickupList.size(); j++){
+    for(int i = 0; i < pickupList.length()-1; i ++){
+        for(int j = i+1; j < pickupList.length(); j++){
             if(pickupList.at(i) == pickupList.at(j)){
                 return false;
             }
         }
     }
+    
     // Runs through string, makes sure all are positive
-    for(int i = 0; i < pickupList.size(); i++){
-        if(pickupList.at(i) < 0){
+    // integer 'n' is used in the following sequences
+    // of code to convert elements of pickupList into
+    // integers
+    int n = 0;
+    
+    for(int i = 0; i < pickupList.length(); i++){
+        n = pickupList.at(i) - '0';
+        if(n < 0){
             return false;
         }
     }
     
     //Makes sure all the pickups are heading in the same direction above pickupFloorNum
-    if(pickupList.at(0) > pickupFloorNum){
-        for(int i = 1; i < pickupList.size(); i++){
-            if(pickupList.at(i) < pickupFloorNum){
+    n = pickupList.at(0) - '0';
+    if(n > pickupFloorNum){
+        for(int i = 1; i < pickupList.length(); i++){
+            n = pickupList.at(i) - '0';
+            if(n < pickupFloorNum){
                 return false;
             }
         }
     }
     
     // Same as above, just for pickups that are below pickupFloorNum
-    if(pickupList.at(0) < pickupFloorNum){
-        for(int i = 1; i < pickupList.size(); i++){
-            if(pickupList.at(i) < pickupFloorNum){
+    n = pickupList.at(0) - '0';
+    if(n < pickupFloorNum){
+        for(int i = 1; i < pickupList.length(); i++){
+            n = pickupList.at(i) - '0';
+            if(n < pickupFloorNum){
                 return false;
             }
         }
@@ -90,9 +137,10 @@ bool Game::isValidPickupList(const string& pickupList, const int pickupFloorNum)
     
     //The maximum value pointed to by an index of pickupList must be strictly less than the number of people on the floor pointed to by pickupFloorNum
     int max = 0;
-    for(int i = 0; i < pickupList.size(); i++){
-        if(pickupList.at(i) > max){
-            max = pickupList.at(i);
+    for(int i = 0; i < pickupList.length(); i++){
+        n = pickupList.at(i) - '0';
+        if(n > max){
+            max = pickupList.at(i) - '0';
         }
     }
     // returns false if an index of pickupList exceeds the number
