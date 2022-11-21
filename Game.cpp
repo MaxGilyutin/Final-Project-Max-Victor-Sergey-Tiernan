@@ -20,73 +20,48 @@ using namespace std;
 // Stub for playGame for Core, which plays random games
 // You *must* revise this function according to the RME and spec
 void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
-    std::mt19937 gen(1);
-    std::uniform_int_distribution<> floorDist(0, 9);
-    std::uniform_int_distribution<> angerDist(0, 3);
     
+    if(!gameFile.is_open()){
+        exit(1);
+    }
+
     //load and prepare all the data for the game loop
     isAIMode = isAIModeIn;
     printGameStartPrompt();
     initGame(gameFile);
     
     string line;
-    int currentTick = 0;
-    // game loop
     Person p;
+    Move nextMove;
     
-    if(getline(gameFile,line))
-    {
-        p = Person(line);
-    }
     while (true) {
-        // read all events for current tick from game.in and spawn new persons if any
-        while(currentTick == p.getTurn()){
+        while(getline(gameFile, line)){
+            p = Person(line);
+            
+            while(building.getTime() == p.getTurn()){
+                building.prettyPrintBuilding(cout);
+                satisfactionIndex.printSatisfaction(cout, false);
+                checkForGameEnd();
+                nextMove = getMove();
+                update(nextMove);
+            }
             building.spawnPerson(p);
-            if(getline(gameFile,line)) {
-                p = Person(line);
-            }
-            else{
-                break;
-            }
+            
         }
-
-        
-        
-        // print the building
-        
-        // check if game ended
-        
-        // take player's/AI's move
-        
-        // update game according to the move
-        
-        /*
-        int src = floorDist(gen);
-        int dst = floorDist(gen);
-        if (src != dst) {
-            std::stringstream ss;
-            ss << currentTick << "f" << src << "t" << dst << "a" << angerDist(gen);
-            p = Person(ss.str());
-        }
-        */
         
         building.prettyPrintBuilding(cout);
         satisfactionIndex.printSatisfaction(cout, false);
-        //ends the game if gameend conditions are met
         checkForGameEnd();
-        
-        Move nextMove = getMove();
+        nextMove = getMove();
         update(nextMove);
         
-        currentTick++;
     }
 }
+
 // Stub for isValidPickupList for Core
 // You *must* revise this function according to the RME and spec
 bool Game::isValidPickupList(const string& pickupList, const int pickupFloorNum) const {
     
-    //TO DO:
-    //Figure out how to convert pickupList
     //  Makes sure the list doesn't exceed elevator capacity
     if(pickupList.length() > ELEVATOR_CAPACITY){
         return false;
@@ -113,44 +88,55 @@ bool Game::isValidPickupList(const string& pickupList, const int pickupFloorNum)
         }
     }
     
-    //Makes sure all the pickups are heading in the same direction above pickupFloorNum
-    n = pickupList.at(0) - '0';
-    if(n > pickupFloorNum){
+    //Makes sure all the pickups are heading in the same direction
+    //TO DO: IMPLEMENT
+    //
+    int currentPerson = pickupList.at(0) - '0';
+    
+    if(building.getFloorByFloorNum(pickupFloorNum).getPersonByIndex(currentPerson).getTargetFloor() > pickupFloorNum){
         for(int i = 1; i < pickupList.length(); i++){
-            n = pickupList.at(i) - '0';
-            if(n < pickupFloorNum){
+            currentPerson = pickupList.at(i) - '0';
+            if(building.getFloorByFloorNum(pickupFloorNum).getPersonByIndex(currentPerson).getTargetFloor() < pickupFloorNum){
                 return false;
             }
+            
         }
     }
     
-    // Same as above, just for pickups that are below pickupFloorNum
-    n = pickupList.at(0) - '0';
-    if(n < pickupFloorNum){
+    currentPerson = pickupList.at(0) - '0';
+    
+    if(building.getFloorByFloorNum(pickupFloorNum).getPersonByIndex(currentPerson).getTargetFloor() < pickupFloorNum){
         for(int i = 1; i < pickupList.length(); i++){
-            n = pickupList.at(i) - '0';
-            if(n < pickupFloorNum){
+            currentPerson = pickupList.at(i) - '0';
+            if(building.getFloorByFloorNum(pickupFloorNum).getPersonByIndex(currentPerson).getTargetFloor() > pickupFloorNum){
                 return false;
             }
+            
         }
     }
+    
     
     //The maximum value pointed to by an index of pickupList must be strictly less than the number of people on the floor pointed to by pickupFloorNum
     int max = 0;
     for(int i = 0; i < pickupList.length(); i++){
         n = pickupList.at(i) - '0';
         if(n > max){
-            max = pickupList.at(i) - '0';
+            max = n;
         }
     }
     // returns false if an index of pickupList exceeds the number
     // of people on that floor
-    if(max > building.getFloorByFloorNum(pickupFloorNum).getNumPeople()){
+    if(max >= building.getFloorByFloorNum(pickupFloorNum).getNumPeople()){
+        return false;
+    }
+    if(building.getFloorByFloorNum(pickupFloorNum).getNumPeople() == 0 && pickupList.length() != 0){
         return false;
     }
     
+    
     return true;
 }
+
 
 //////////////////////////////////////////////////////
 ////// DO NOT MODIFY ANY CODE BENEATH THIS LINE //////
