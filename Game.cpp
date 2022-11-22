@@ -19,6 +19,7 @@ using namespace std;
 
 // Stub for playGame for Core, which plays random games
 // You *must* revise this function according to the RME and spec
+
 void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
     
     if(!gameFile.is_open()){
@@ -34,18 +35,27 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
     Person p;
     Move nextMove;
     
+    getline(gameFile, line);
+    //makes it so any earlier entries in game.in don't screw up the actual entries
+    while(line.length() < 7){
+        getline(gameFile, line);
+    }
+    
     while (true) {
         while(getline(gameFile, line)){
             p = Person(line);
             
-            while(building.getTime() == p.getTurn()){
+            if(p.getTurn() <= building.getTime()){
+                building.spawnPerson(p);
+                
+            }else{
                 building.prettyPrintBuilding(cout);
                 satisfactionIndex.printSatisfaction(cout, false);
                 checkForGameEnd();
                 nextMove = getMove();
                 update(nextMove);
+                building.spawnPerson(p);
             }
-            building.spawnPerson(p);
             
         }
         
