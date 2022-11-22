@@ -50,31 +50,23 @@ void Floor::addPerson(Person newPerson, int request) {
     }
 
 
+//Modifies: people[], numPeople, hasUpRequest, hasDownRequest
 void Floor::removePeople(int indicesToRemove[MAX_PEOPLE_PER_FLOOR], int numPeopleToRemove) {
 
+    //sort indicesToRemove array
+    sort(indicesToRemove, indicesToRemove + numPeopleToRemove);
     
-    Person array[MAX_PEOPLE_PER_FLOOR];
-    int skips = 0;
-        
-        for (int i = 0; i < numPeopleToRemove; i++)
-        {
-            for (int j = 0; j < numPeople; j++)
-            {
-                if (i == indicesToRemove[j])
-                {
-                    numPeople--;
-                }
-                for (int k = 0; k < i; k++){
-                    if(indicesToRemove[k] < indicesToRemove[i]){
-                        skips++;
-                    }
-                }
-                for (int l = indicesToRemove[i]-skips; l <= numPeople; l++){
-                    people[l] = people[l+1];
-                }
-            }
-            skips = 0;
+    int countRemoved = 0;
+    
+    for(int i = 0; i < numPeople; i++){
+        if(i != indicesToRemove[countRemoved]){
+            people[i-countRemoved] = people[i];
+        }else{
+            countRemoved++;
         }
+    }
+    
+    numPeople = numPeople - numPeopleToRemove;
     resetRequests();
 }
 
@@ -82,25 +74,16 @@ void Floor::removePeople(int indicesToRemove[MAX_PEOPLE_PER_FLOOR], int numPeopl
 
 
 void Floor::resetRequests() {
-    int down = 0;
     hasUpRequest = false;
-    int up = 0;
     hasDownRequest = false;
     
     for (int i = 0; i < numPeople; i++){
-        if (people[i].getTargetFloor() > people[i].getCurrentFloor()){
-            down++;
+        if(people[i].getTargetFloor() > people[i].getCurrentFloor()){
+            hasUpRequest = true;
         }
-        else if (people[i].getTargetFloor() < people[i].getCurrentFloor()){
-            up++;
+        else if(people[i].getTargetFloor() < people[i].getCurrentFloor()){
+            hasDownRequest = true;
         }
-    
-    }
-    if (up > 0){
-        hasUpRequest = true;
-    }
-    if (down > 0){
-        hasDownRequest = true;
     }
 }
 
