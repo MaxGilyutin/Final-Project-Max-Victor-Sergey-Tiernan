@@ -24,39 +24,38 @@ Move::Move(string commandString) : Move() {
     stringstream ss(str);
 
     char x;
-    isPass = false;
-    isPickup = false;
-    isSave = false;
-    isQuit = false;
 
-    ss >> x;
-    if (commandString.size() == 0)
+    if (str.size() == 0)
     {
-        
         isPass == true;
     }
-    
-    else if (x == 'Q' || x == 'q')
+    else if (str.size() == 1)
     {
-        isQuit = true;
+        if (str == "Q" || str == "q")
+        {
+            isQuit = true;
+        }
+        else if (str == "S" || str == "s")
+        {
+            isSave = true;
+        }
     }
-    else if(x == 'S' || x == 's')
+    else if (str.size() == 3)
     {
-        isSave = true;
+        ss >> x;
+        ss >> elevatorId;
+        ss >> x;
+        isPickup = true;
     }
-    else
+    else if (str.size() == 4)
     {
+        ss >> x;
         ss >> elevatorId;
         ss >> x;
         ss >> targetFloor;
-        if (ss.fail())
-        {
-            ss.clear();
-            isPickup = true;
-
-        }
-       
     }
+
+
 
    
 
@@ -72,13 +71,14 @@ bool Move::isValidMove(Elevator elevators[NUM_ELEVATORS]) const {
     else if (isPickup)
     {
         if (elevatorId >= 0 && elevatorId < NUM_ELEVATORS &&
-            !(elevators[elevatorId].isServicing()))
+            elevators[elevatorId].isServicing() == false)
         {
             return true;
         }
         
     }
-    else
+    else if (elevatorId >= 0 && elevatorId < NUM_ELEVATORS &&
+        elevators[elevatorId].isServicing() == false)
     {
         if (targetFloor >= 0 && targetFloor < NUM_FLOORS &&
             targetFloor != elevators[elevatorId].getCurrentFloor())
@@ -95,15 +95,10 @@ bool Move::isValidMove(Elevator elevators[NUM_ELEVATORS]) const {
 
 void Move::setPeopleToPickup(const string& pickupList, const int currentFloor, const Floor& pickupFloor) {
     //TODO: Implement setPeopleToPickup
-    numPeopleToPickup = 0;
-    totalSatisfaction = 0;
-    
    
-
-    for (int i = 0; i < pickupList.length(); i++)
+    for (int i = 0; i < pickupList.size(); i++)
     {
-        int x = (int)(pickupList.at(i));
-        peopleToPickup[i] = x;
+        peopleToPickup[i] = pickupList.at(i) - '0';
         numPeopleToPickup++;
         totalSatisfaction += (MAX_ANGER - pickupFloor.getPersonByIndex(peopleToPickup[i]).getAngerLevel());
 
@@ -113,7 +108,7 @@ void Move::setPeopleToPickup(const string& pickupList, const int currentFloor, c
     targetFloor = pickupFloor.getPersonByIndex(peopleToPickup[0]).getTargetFloor();
     int floorDiff = abs(currentFloor - targetFloor);
 
-    for (int i = 1; i < pickupList.length(); i++)
+    for (int i = 1; i < pickupList.size(); i++)
     {
         if (abs(currentFloor - pickupFloor.getPersonByIndex(peopleToPickup[i]).getTargetFloor()) > floorDiff)
         {
