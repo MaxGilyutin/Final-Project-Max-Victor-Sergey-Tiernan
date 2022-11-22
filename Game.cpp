@@ -33,14 +33,33 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
     
     string line;
     Person p;
+    Person firstPerson;
     Move nextMove;
     
     //makes it so any earlier entries in game.in don't screw up the actual entries
+    getline(gameFile, line);
     while(line.length() < 7){
         getline(gameFile, line);
+        if(line.length() >= 7){
+            firstPerson = Person(line);
+            break;
+        }
+    }
+    
+    //makes sure the first person works
+    if(firstPerson.getTurn() <= building.getTime()){
+        building.spawnPerson(firstPerson);
+    }else{
+        building.prettyPrintBuilding(cout);
+        satisfactionIndex.printSatisfaction(cout, false);
+        checkForGameEnd();
+        nextMove = getMove();
+        update(nextMove);
+        building.spawnPerson(firstPerson);
     }
     
     while (true) {
+           
         while(getline(gameFile, line)){
             p = Person(line);
             
