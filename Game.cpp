@@ -35,7 +35,6 @@ void Game::playGame(bool isAIModeIn, ifstream& gameFile) {
     Person p;
     Move nextMove;
     
-    getline(gameFile, line);
     //makes it so any earlier entries in game.in don't screw up the actual entries
     while(line.length() < 7){
         getline(gameFile, line);
