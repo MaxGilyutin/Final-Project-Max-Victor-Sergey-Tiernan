@@ -4,8 +4,8 @@
  * Floor.cpp
  * Project UID 28eb18c2c1ce490aada441e65559efdd
  *
- * Max Victor Sergey Tiernan
- * <#Uniqnames#>
+ * Max Gilyutin, Victor Diaso, Tiernan Jesrani, Sergey Kislenkov
+ * mgily, vjdiaso, tiernanj, skis
  *
  * Final Project - Elevators
  */
