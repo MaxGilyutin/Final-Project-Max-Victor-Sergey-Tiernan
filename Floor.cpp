@@ -4,8 +4,8 @@
  * Floor.cpp
  * Project UID 28eb18c2c1ce490aada441e65559efdd
  *
- * Max Gilyutin, Victor Diaso, Tiernan Jesrani, Sergey Kislenkov
- * mgily, vjdiaso, tiernanj, skis
+ * Max Victor Sergey Tiernan
+ * <#Uniqnames#>
  *
  * Final Project - Elevators
  */
@@ -18,19 +18,17 @@ using namespace std;
 int Floor::tick(int currentTime) {
     
     int numExploded = 0;
-    string str = "";
+    int a[numPeople];
+    int x = 0;
     
-    for (int i = 0; i <= MAX_PEOPLE_PER_FLOOR; i++){
+    for (int i = 0; i < numPeople; i++){
         if (people[i].tick(currentTime)){
-            numExploded += 1;
-            str += (char) i;
-
+            numExploded++;
+            a[x] = i;
+            x++;
         }
-        
-        int a[numExploded];
-
-        removePeople(a, numExploded);
     }
+    removePeople(a, numExploded);
     return numExploded;
 }
 
@@ -44,57 +42,65 @@ void Floor::addPerson(Person newPerson, int request) {
     }
     
     if (request > 0){
-        Person hasUpRequest;
-        
-        if (request < 0){
-            Person hasDownRequest;
+        hasUpRequest = true;
+    }
+    else if (request < 0){
+        hasDownRequest = true;
         }
     }
-}
+
 
 void Floor::removePeople(int indicesToRemove[MAX_PEOPLE_PER_FLOOR], int numPeopleToRemove) {
 
+    
     Person array[MAX_PEOPLE_PER_FLOOR];
     int skips = 0;
         
-        for (int i = 0; i < numPeople; i++)
+        for (int i = 0; i < numPeopleToRemove; i++)
         {
-            for (int z = 0; z < numPeopleToRemove; z++)
+            for (int j = 0; j < numPeople; j++)
             {
-                if (i != indicesToRemove[z])
+                if (i == indicesToRemove[j])
                 {
-                    array[i - skips] = people[i];
+                    numPeople--;
                 }
-                else
-                {
-                    skips++;
+                for (int k = 0; k < i; k++){
+                    if(indicesToRemove[k] < indicesToRemove[i]){
+                        skips++;
+                    }
+                }
+                for (int l = indicesToRemove[i]-skips; l <= numPeople; l++){
+                    people[l] = people[l+1];
                 }
             }
-                
+            skips = 0;
         }
-        numPeople -= numPeopleToRemove;
-        
-        for (int i = 0; i < MAX_PEOPLE_PER_FLOOR; i++)
-        {
-            people[i] = array[i];
-        }
-    
+    resetRequests();
 }
 
 
 
 
 void Floor::resetRequests() {
+    int down = 0;
     hasUpRequest = false;
+    int up = 0;
     hasDownRequest = false;
     
-    for (int i = 0; i <= numPeople; i++){
+    for (int i = 0; i < numPeople; i++){
         if (people[i].getTargetFloor() > people[i].getCurrentFloor()){
-            hasUpRequest = true;
+            down++;
         }
         else if (people[i].getTargetFloor() < people[i].getCurrentFloor()){
-            hasDownRequest = true;
+            up++;
         }
+    
+    }
+    if (up > 0){
+        hasUpRequest = true;
+    }
+    if (down > 0){
+        hasDownRequest = true;
     }
 }
 
