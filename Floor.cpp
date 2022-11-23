@@ -70,7 +70,7 @@ void Floor::removePeople(int indicesToRemove[MAX_PEOPLE_PER_FLOOR], int numPeopl
         
     }
     
-    numPeople = numPeople - countRemoved;
+    numPeople = numPeople - numPeopleToRemove;
     
     resetRequests();
 }
