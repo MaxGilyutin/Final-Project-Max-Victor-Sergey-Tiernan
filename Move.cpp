@@ -27,7 +27,7 @@ Move::Move(string commandString) : Move() {
 
     if (str.size() == 0)
     {
-        isPass == true;
+        isPass = true;
     }
     else if (str.size() == 1)
     {
