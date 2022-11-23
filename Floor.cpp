@@ -53,20 +53,25 @@ void Floor::addPerson(Person newPerson, int request) {
 //Modifies: people[], numPeople, hasUpRequest, hasDownRequest
 void Floor::removePeople(int indicesToRemove[MAX_PEOPLE_PER_FLOOR], int numPeopleToRemove) {
 
-    //sort indicesToRemove array
+    if (numPeopleToRemove == 0){
+        return;
+    }
+    
     sort(indicesToRemove, indicesToRemove + numPeopleToRemove);
     
     int countRemoved = 0;
     
-    for(int i = 0; i < numPeople; i++){
+    for(int i = 0; i < numPeople && countRemoved < numPeopleToRemove; i++){
         if(i != indicesToRemove[countRemoved]){
             people[i-countRemoved] = people[i];
         }else{
             countRemoved++;
         }
+        
     }
     
-    numPeople = numPeople - numPeopleToRemove;
+    numPeople = numPeople - countRemoved;
+    
     resetRequests();
 }
 
