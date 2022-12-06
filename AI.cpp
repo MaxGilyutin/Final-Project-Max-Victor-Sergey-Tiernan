@@ -20,27 +20,41 @@ string getAIMoveString(const BuildingState& buildingState) {
     bool elevator0 = buildingState.elevators[0].isServicing;
     bool elevator1 = buildingState.elevators[1].isServicing;
     bool elevator2 = buildingState.elevators[2].isServicing;
+    int closestElevatorTicks = 9;
+    int closestElevator = 0;
     int maxPriority;
     int maxAngerLevel = 0;
-    for ( int i = 0; i < NUM_FLOORS; i++) {
-        for ( int j = 0; j < buildingState.floors[i].numPeople; i++) {
-            if (buildingState.floors[i].people[j].angerLevel > maxAngerLevel) {
-                maxPriority = i;
+    int maxPriorityAngerDiff;
+    int elevatorTicksPossible;
+    if ( elevator0 != true|| elevator1 != true || elevator2 != true){
+        for ( int i = 0; i < NUM_FLOORS; i++) {
+            for ( int j = 0; j < buildingState.floors[i].numPeople; i++) {
+                if (buildingState.floors[i].people[j].angerLevel > maxAngerLevel) {
+                    for ( int k = 0; k < NUM_ELEVATORS; k++){
+                        elevatorTicksPossible = abs(buildingState.elevators[k].currentFloor - i);
+                        if (buildingState.elevators[k].isServicing != true && elevatorTicksPossible < closestElevatorTicks) {
+                            closestElevator = k;
+                            closestElevatorTicks = elevatorTicksPossible;
+                        }
+                        maxPriorityAngerDiff = MAX_ANGER - buildingState.floors[i].people[j].angerLevel;
+                        if (maxPriorityAngerDiff > elevatorTicksPossible){
+                            if ( i == 10) {
+                                maxPriority = i - 1;
+                            }
+                            else {
+                                maxPriority = i;
+                            }
+                        }
+                    }
+                }
             }
         }
+        
+        return "e" + to_string(closestElevator) + "f" + to_string(maxPriority);
     }
-    
-    /*if ( buildingState.elevators[0].isServicing != true) {
+    else {
         return "";
     }
-    if (buildingState.elevators[1].isServicing != true) {
-        return "";
-    }
-    if ( buildingState.elevators[2].isServicing != true) {
-        return "";
-    }
-     */
-    return "";
 }
 
 string getAIPickupList(const Move& move, const BuildingState& buildingState, 
