@@ -4,81 +4,117 @@
  * AI.cpp
  * Project UID 28eb18c2c1ce490aada441e65559efdd
  *
- * <#Names#>
- * <#Uniqnames#>
+ * Max Gilyutin, Victor Diaso, Tiernan Jesrani, Sergey Kislenkov
+ * mgily, vjdiaso, tiernanj, skis
  *
  * Final Project - Elevators
  */
 
 #include "AI.h"
+#include "Person.h"
 #include <cassert>
 
 // This file is used only in the Reach, not the Core.
 // You do not need to make any changes to this file for the Core
 
+
 string getAIMoveString(const BuildingState& buildingState) {
-    int angerDiff = MAX_ANGER - 1;
-    int distance = NUM_FLOORS - 1;
-    int currentDistance;
-    int currentAngerDiff;
-    string elevator;
-    int elevatorNum;
-    string floor;
     
-    for (int i = 0; i < NUM_ELEVATORS; i++)
-    {
-        if (!(buildingState.elevators[i].isServicing))
-        {
-            for (int z = 0; z < NUM_FLOORS; z++)
-            {
-                for (int x = 0; x < buildingState.floors[z].numPeople; x++)
-                {
-                    currentAngerDiff = MAX_ANGER - buildingState.floors[z].people[x].angerLevel;
-                    currentDistance = abs(buildingState.elevators[i].currentFloor - z);
-
-                    if (currentAngerDiff <= angerDiff)
-                    {
-                        
-                        if (currentDistance < distance)
-                        {
-                            elevator = buildingState.elevators[i].elevatorId;
-                            elevatorNum = buildingState.elevators[i].elevatorId;
-                            floor = buildingState.floors[z].floorNum;
-                            angerDiff = currentAngerDiff;
-                            distance = currentDistance;
-                        }
-                        else if (currentDistance == 0)
-                        {
-                            elevator = buildingState.elevators[i].elevatorId;
-                            elevatorNum = buildingState.elevators[i].elevatorId;
-                            angerDiff = currentAngerDiff;
-                            distance = currentDistance;
-                        }
-                    }
-
-
-
-
-                }
-            }
-        }
-     }
-
-    if (currentDistance == 0)
-    {
-        return "e" + elevator + "p";
-    }
-    else if (!(buildingState.elevators[elevatorNum].isServicing))
-    {
-        return "e" + elevator + "f" + floor;
-    }
-    else
-    {
+    //checks if the elevators are servicing
+    bool e0 = buildingState.elevators[0].isServicing;
+    bool e1 = buildingState.elevators[1].isServicing;
+    bool e2 = buildingState.elevators[2].isServicing;
+    
+    // returns Enter if all elevators are servicing
+    if(e0 && e1 && e2){
         return "";
     }
+    
+    int sumPeople = 0;
+    for(int i = 0; i < NUM_FLOORS; i++){
+        sumPeople += buildingState.floors[i].numPeople;
+    }
+    if(sumPeople == 0){
+        return "";
+    }
+    
+    int floorVal = 0;
+    
+    for(int i = 0; i < NUM_ELEVATORS; i++){
+        floorVal = buildingState.elevators[i].currentFloor;
+        
+        if(buildingState.elevators[i].targetFloor == buildingState.elevators[i].currentFloor && buildingState.floors[floorVal].numPeople > 0){
+            return "e" + to_string(i) + "p";
+        }
+    }
+    
+    // First, find the closest elevator for each floor
+    //  There are 10 array slots, with 3 possibilities for elevators
+    int floorClosestElevators[10] = {0};
+    int difference1 = 999;
+    int difference2 = 999;
+    int difference3 = 999;
+    
+    // Fills out array with closest elevators
+    //Go through the FLOORS
+    for(int i = 0; i < 10; i++){
+        //Go through the ELEVATORS
+        if(!buildingState.elevators[0].isServicing){
+            //takes distance from elevator to floor
+            difference1 = abs(buildingState.elevators[0].currentFloor - i);
+            floorClosestElevators[i] = 0;
+        }
+        if(!buildingState.elevators[1].isServicing){
+            //takes distance from elevator to floor
+            difference2 = abs(buildingState.elevators[1].currentFloor - i);
+            if(difference2 < difference1){
+                floorClosestElevators[i] = 1;
+            }
+        }
+        if(!buildingState.elevators[2].isServicing){
+            difference3 = abs(buildingState.elevators[2].currentFloor - i);
+            if(difference3 < difference2 && difference3 < difference1){
+                floorClosestElevators[i] = 2;
+            }
+        }
+    }
+    
+    int distance = 0;
+    
+    //Creates an array that will keep track of all the score potentials of a floor
+    int floorScores[10] = {0};
+    //Variable for keeping track of the score for the floor
+    int sum = 0;
+    // Runs through floor
+    for(int i = 0; i < 10; i++){
+        // Runs through people on the floor
+        for(int j = 0; j < buildingState.floors[i].numPeople; j++){
+            sum += (10 - buildingState.floors[i].people[j].angerLevel);
+        }
+        
+        //calculates how far the closest elevator has to travel to reach the floor
+        distance = abs(buildingState.elevators[floorClosestElevators[i]].currentFloor - i);
+        //from the sum, subtracts the anger that will accumulate while the elevator is traveling
+        sum -= buildingState.floors[i].numPeople * distance;
+        
+        floorScores[i] = sum;
+    }
+    
+    //sets the bestFloor to target to the one with the greatest floorScore
+    int bestFloor = 0;
+    for(int i = 0; i < 10; i++){
+        if(floorScores[i] > floorScores[bestFloor]){
+            bestFloor = i;
+        }
+    }
+    
+    int bestElevator = floorClosestElevators[bestFloor];
 
     
-   
+    return "e" + to_string(bestElevator) + "f" + to_string(bestFloor);
+    
+    
+    
 }
 
 string getAIPickupList(const Move& move, const BuildingState& buildingState,
@@ -91,6 +127,23 @@ string getAIPickupList(const Move& move, const BuildingState& buildingState,
     bool up = false;
     bool down = false;
     string dropOff = "";
+    string dropOffEdge = "";
+    
+    //accounts for bottom floor pickups
+    if(floorToPickup.getPersonByIndex(0).getCurrentFloor() == 0){
+        for(int i = 0; i < floorToPickup.getNumPeople(); i++){
+            dropOffEdge += to_string(i);
+        }
+        return dropOffEdge;
+    }
+    
+    //acounts for top floor pickups
+    if(floorToPickup.getPersonByIndex(0).getCurrentFloor() == 9){
+        for(int i = 0; i < floorToPickup.getNumPeople(); i++){
+            dropOffEdge += to_string(i);
+        }
+        return dropOffEdge;
+    }
     
     for (int i = 0; i < floorToPickup.getNumPeople(); i++){
         if (floorToPickup.getPersonByIndex(i).getTargetFloor() > floorToPickup.getPersonByIndex(i).getCurrentFloor()){
@@ -107,7 +160,7 @@ string getAIPickupList(const Move& move, const BuildingState& buildingState,
     angerUp *= countUp;
     angerDown *= countDown;
     
-    if (angerUp > angerDown){
+    if (angerUp >= angerDown){
         up = true;
     }
     else if (angerDown > angerUp){
@@ -116,11 +169,11 @@ string getAIPickupList(const Move& move, const BuildingState& buildingState,
     
     for (int j = 0; j < floorToPickup.getNumPeople(); j++){
         if (floorToPickup.getPersonByIndex(j).getTargetFloor() > floorToPickup.getPersonByIndex(j).getCurrentFloor() && up){
-            dropOff += j;
+            dropOff += to_string(j);
             
         }
         else if (floorToPickup.getPersonByIndex(j).getTargetFloor() < floorToPickup.getPersonByIndex(j).getCurrentFloor() && down){
-            dropOff += j;
+            dropOff += to_string(j);
 
         }
     }
@@ -128,7 +181,4 @@ string getAIPickupList(const Move& move, const BuildingState& buildingState,
         
     return dropOff;
 }
-    
-
-
 
