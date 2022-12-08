@@ -17,49 +17,74 @@
 // You do not need to make any changes to this file for the Core
 
 string getAIMoveString(const BuildingState& buildingState) {
-    bool elevator0 = buildingState.elevators[0].isServicing;
-    bool elevator1 = buildingState.elevators[1].isServicing;
-    bool elevator2 = buildingState.elevators[2].isServicing;
-    int closestElevatorTicks = 9;
-    int closestElevator = 0;
-    int maxPriority;
-    int maxAngerLevel = 0;
-    int maxPriorityAngerDiff;
-    int elevatorTicksPossible;
-    if ( elevator0 != true|| elevator1 != true || elevator2 != true){
-        for ( int i = 0; i < NUM_FLOORS; i++) {
-            for ( int j = 0; j < buildingState.floors[i].numPeople; i++) {
-                if (buildingState.floors[i].people[j].angerLevel > maxAngerLevel) {
-                    for ( int k = 0; k < NUM_ELEVATORS; k++){
-                        elevatorTicksPossible = abs(buildingState.elevators[k].currentFloor - i);
-                        if (buildingState.elevators[k].isServicing != true && elevatorTicksPossible < closestElevatorTicks) {
-                            closestElevator = k;
-                            closestElevatorTicks = elevatorTicksPossible;
+    int angerDiff = MAX_ANGER - 1;
+    int distance = NUM_FLOORS - 1;
+    int currentDistance;
+    int currentAngerDiff;
+    string elevator;
+    int elevatorNum;
+    string floor;
+    
+    for (int i = 0; i < NUM_ELEVATORS; i++)
+    {
+        if (!(buildingState.elevators[i].isServicing))
+        {
+            for (int z = 0; z < NUM_FLOORS; z++)
+            {
+                for (int x = 0; x < buildingState.floors[z].numPeople; x++)
+                {
+                    currentAngerDiff = MAX_ANGER - buildingState.floors[z].people[x].angerLevel;
+                    currentDistance = abs(buildingState.elevators[i].currentFloor - z);
+
+                    if (currentAngerDiff <= angerDiff)
+                    {
+                        
+                        if (currentDistance < distance)
+                        {
+                            elevator = buildingState.elevators[i].elevatorId;
+                            elevatorNum = buildingState.elevators[i].elevatorId;
+                            floor = buildingState.floors[z].floorNum;
+                            angerDiff = currentAngerDiff;
+                            distance = currentDistance;
                         }
-                        maxPriorityAngerDiff = MAX_ANGER - buildingState.floors[i].people[j].angerLevel;
-                        if (maxPriorityAngerDiff > elevatorTicksPossible){
-                            if ( i == 10) {
-                                maxPriority = i - 1;
-                            }
-                            else {
-                                maxPriority = i;
-                            }
+                        else if (currentDistance == 0)
+                        {
+                            elevator = buildingState.elevators[i].elevatorId;
+                            elevatorNum = buildingState.elevators[i].elevatorId;
+                            angerDiff = currentAngerDiff;
+                            distance = currentDistance;
                         }
                     }
+
+
+
+
                 }
             }
         }
-        
-        return "e" + to_string(closestElevator) + "f" + to_string(maxPriority);
+     }
+
+    if (currentDistance == 0)
+    {
+        return "e" + elevator + "p";
     }
-    else {
+    else if (!(buildingState.elevators[elevatorNum].isServicing))
+    {
+        return "e" + elevator + "f" + floor;
+    }
+    else
+    {
         return "";
     }
+
+    
+   
 }
 
 string getAIPickupList(const Move& move, const BuildingState& buildingState, 
                        const Floor& floorToPickup) {
     return "";
 }
+
 
 
