@@ -39,7 +39,7 @@ string getAIMoveString(const BuildingState& buildingState) {
     }
     
     int floorVal = 0;
-    
+    //goes through elevators, tells it to pickup if the floor matches the elevator
     for(int i = 0; i < NUM_ELEVATORS; i++){
         floorVal = buildingState.elevators[i].currentFloor;
         
@@ -98,6 +98,8 @@ string getAIMoveString(const BuildingState& buildingState) {
         sum -= buildingState.floors[i].numPeople * distance;
         
         floorScores[i] = sum;
+        
+        sum = 0;
     }
     
     //sets the bestFloor to target to the one with the greatest floorScore
@@ -109,9 +111,12 @@ string getAIMoveString(const BuildingState& buildingState) {
     }
     
     int bestElevator = floorClosestElevators[bestFloor];
-
-    
-    return "e" + to_string(bestElevator) + "f" + to_string(bestFloor);
+    //only return if the target floor has people
+    if(buildingState.floors[bestFloor].numPeople > 0){
+        return "e" + to_string(bestElevator) + "f" + to_string(bestFloor);
+    }else{
+        return "";
+    }
     
     
     
@@ -127,23 +132,6 @@ string getAIPickupList(const Move& move, const BuildingState& buildingState,
     bool up = false;
     bool down = false;
     string dropOff = "";
-    string dropOffEdge = "";
-    
-    //accounts for bottom floor pickups
-    if(floorToPickup.getPersonByIndex(0).getCurrentFloor() == 0){
-        for(int i = 0; i < floorToPickup.getNumPeople(); i++){
-            dropOffEdge += to_string(i);
-        }
-        return dropOffEdge;
-    }
-    
-    //acounts for top floor pickups
-    if(floorToPickup.getPersonByIndex(0).getCurrentFloor() == 9){
-        for(int i = 0; i < floorToPickup.getNumPeople(); i++){
-            dropOffEdge += to_string(i);
-        }
-        return dropOffEdge;
-    }
     
     for (int i = 0; i < floorToPickup.getNumPeople(); i++){
         if (floorToPickup.getPersonByIndex(i).getTargetFloor() > floorToPickup.getPersonByIndex(i).getCurrentFloor()){
@@ -181,4 +169,3 @@ string getAIPickupList(const Move& move, const BuildingState& buildingState,
         
     return dropOff;
 }
-
