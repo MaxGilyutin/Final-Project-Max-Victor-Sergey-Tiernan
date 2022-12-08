@@ -81,10 +81,54 @@ string getAIMoveString(const BuildingState& buildingState) {
    
 }
 
-string getAIPickupList(const Move& move, const BuildingState& buildingState, 
+string getAIPickupList(const Move& move, const BuildingState& buildingState,
                        const Floor& floorToPickup) {
-    return "";
+    
+    int countUp = 0;
+    int countDown = 0;
+    int angerUp = 0;
+    int angerDown = 0;
+    bool up = false;
+    bool down = false;
+    string dropOff = "";
+    
+    for (int i = 0; i < floorToPickup.getNumPeople(); i++){
+        if (floorToPickup.getPersonByIndex(i).getTargetFloor() > floorToPickup.getPersonByIndex(i).getCurrentFloor()){
+            countUp++;
+            angerUp += (10 - floorToPickup.getPersonByIndex(i).getAngerLevel());
+            
+        }
+        else if (floorToPickup.getPersonByIndex(i).getTargetFloor() < floorToPickup.getPersonByIndex(i).getCurrentFloor()){
+            countDown++;
+            angerDown += (10 - floorToPickup.getPersonByIndex(i).getAngerLevel());
+        }
+    }
+    
+    angerUp *= countUp;
+    angerDown *= countDown;
+    
+    if (angerUp > angerDown){
+        up = true;
+    }
+    else if (angerDown > angerUp){
+        down = true;
+    }
+    
+    for (int j = 0; j < floorToPickup.getNumPeople(); j++){
+        if (floorToPickup.getPersonByIndex(j).getTargetFloor() > floorToPickup.getPersonByIndex(j).getCurrentFloor() && up){
+            dropOff += j;
+            
+        }
+        else if (floorToPickup.getPersonByIndex(j).getTargetFloor() < floorToPickup.getPersonByIndex(j).getCurrentFloor() && down){
+            dropOff += j;
+
+        }
+    }
+        
+        
+    return dropOff;
 }
+    
 
 
 
